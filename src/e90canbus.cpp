@@ -12,6 +12,8 @@ bool s_light_dip = false;
 bool s_light_main = false;
 bool s_light_fog = false;
 
+uint8_t s_light_indicator = I_OFF;
+
 uint16_t s_fuel = 0; // 1000 - max;
 
 //Timing
@@ -37,7 +39,7 @@ void canSend(){
     }
 
     if(canCounter % 10 == 0){ //1000 ms interval
-      ;
+      canSendIndicator();
     }
 
     canCounter++;
