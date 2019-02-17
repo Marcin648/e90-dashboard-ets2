@@ -1,0 +1,10 @@
+#include "../include/e90canbus.h"
+
+const uint16_t CAN_ID = 0x19E;
+//uint8_t abs_frame[8] = {0x00, 0xE0, 0xB3, 0xFC, 0xF0, 0x43, 0x00, 0x65};
+uint8_t abs_frame[8] = {0x00, 0x00, 0xB3, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+void canSendAbs(){
+  abs_frame[2] = (((abs_frame[2] >> 4) + 1) << 4) | 0x0F;
+  CAN.sendMsgBuf(CAN_ID, 0, 8, abs_frame);
+}
