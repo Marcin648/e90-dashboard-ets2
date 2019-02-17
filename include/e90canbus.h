@@ -36,5 +36,8 @@ void canSendLights();
 void canSendFuel();
 void canSendIndicator();
 
+void canSendAbsCounter();
+void canSendAirbagCounter();
+
 //Main can data loop
 void canSend();

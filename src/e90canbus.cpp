@@ -5,16 +5,16 @@
 */
 
 //States
-bool s_ignition = false;
+bool s_ignition = true;
 
-bool s_light_parking = false;
-bool s_light_dip = false;
-bool s_light_main = false;
-bool s_light_fog = false;
+bool s_light_parking = true;
+bool s_light_dip = true;
+bool s_light_main = true;
+bool s_light_fog = true;
 
 uint8_t s_light_indicator = I_OFF;
 
-uint16_t s_fuel = 0; // 1000 - max;
+uint16_t s_fuel = 590; // 1000 - max;
 
 //Timing
 uint32_t lastTime = 0;
@@ -23,7 +23,6 @@ uint16_t canCounter = 0;
 /*
   Functions
 */
-
 void canSend(){
   uint32_t courentTime = millis();
   if(courentTime - lastTime > 100){
@@ -32,6 +31,8 @@ void canSend(){
 
     if(canCounter % 2 == 0){ //200 ms interval
       canSendLights();
+      canSendAbsCounter();
+      canSendAirbagCounter();
     }
 
     if(canCounter % 5 == 0){ //500 ms interval
