@@ -13,6 +13,7 @@ bool s_light_main = true;
 bool s_light_fog = true;
 bool s_handbrake = false;
 uint8_t s_light_indicator = I_OFF;
+uint16_t s_rpm = 800;
 uint16_t s_fuel = 590; // 1000 - max;
 
 //Timing
@@ -27,6 +28,7 @@ void canSend(){
   if(courentTime - lastTime > 100){
     //100 ms interval
     canSendIgnitionFrame();
+    canSendRPM();
 
     if(canCounter % 2 == 0){ //200 ms interval
       canSendLights();

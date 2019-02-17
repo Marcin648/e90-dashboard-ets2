@@ -20,6 +20,7 @@ extern bool s_light_main;
 extern bool s_light_fog;
 extern bool s_handbrake;
 extern uint8_t s_light_indicator;
+extern uint16_t s_rpm;
 extern uint16_t s_fuel;
 
 //CAN object
@@ -35,6 +36,7 @@ void canSendFuel();
 void canSendIndicator();
 void canSendAbs();
 void canSendHandbrake();
+void canSendRPM();
 
 void canSendAbsCounter();
 void canSendAirbagCounter();
