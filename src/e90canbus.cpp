@@ -7,6 +7,7 @@
 //States
 bool s_ignition = false;
 
+bool s_light_parking = false;
 bool s_light_dip = false;
 bool s_light_main = false;
 bool s_light_fog = false;
@@ -28,7 +29,7 @@ void canSend(){
     canSendIgnitionFrame();
 
     if(canCounter % 2 == 0){ //200 ms interval
-      printf("200ms\n");
+      canSendLights();
     }
 
     if(canCounter % 5 == 0){ //500 ms interval
