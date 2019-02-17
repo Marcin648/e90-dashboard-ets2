@@ -12,7 +12,7 @@ bool s_light_dip = false;
 bool s_light_main = false;
 bool s_light_fog = false;
 
-float s_fuel = 0.0f;
+uint16_t s_fuel = 0; // 1000 - max;
 
 //Timing
 uint32_t lastTime = 0;
@@ -33,11 +33,11 @@ void canSend(){
     }
 
     if(canCounter % 5 == 0){ //500 ms interval
-      printf("500ms\n");
+      canSendFuel();
     }
 
     if(canCounter % 10 == 0){ //1000 ms interval
-      printf("1000ms\n");
+      ;
     }
 
     canCounter++;
