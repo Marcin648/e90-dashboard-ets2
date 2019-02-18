@@ -26,6 +26,13 @@ extern uint16_t s_rpm;
 extern uint16_t s_speed;
 extern uint16_t s_fuel;
 
+extern uint8_t s_time_hour;
+extern uint8_t s_time_minute;
+extern uint8_t s_time_sec;
+extern uint8_t s_time_day;
+extern uint8_t s_time_month;
+extern uint16_t s_time_year;
+
 //CAN object
 extern MCP_CAN CAN;
 
@@ -41,6 +48,7 @@ void canSendAbs();
 void canSendHandbrake();
 void canSendRPM();
 void canSendSpeed();
+void canSendTime();
 
 void canSendAbsCounter();
 void canSendAirbagCounter();
