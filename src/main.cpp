@@ -15,6 +15,10 @@
 /*
   Setting
 */
+//Delta time multiple
+// 2 - speed scale in mph
+// 3 - speed scale in km/h
+const uint8_t DTIME_MULTIPLE = 3;
 
 //Serial boud rate
 const uint32_t SERIAL_BAUD_RATE = 115200;

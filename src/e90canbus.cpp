@@ -5,16 +5,17 @@
 */
 
 //States
-bool s_ignition = true;
+bool s_ignition = false;
 
-bool s_light_parking = true;
-bool s_light_dip = true;
-bool s_light_main = true;
-bool s_light_fog = true;
+bool s_light_parking = false;
+bool s_light_dip = false;
+bool s_light_main = false;
+bool s_light_fog = false;
 bool s_handbrake = false;
 uint8_t s_light_indicator = I_OFF;
-uint16_t s_rpm = 800;
-uint16_t s_fuel = 590; // 1000 - max;
+uint16_t s_speed = 0;
+uint16_t s_rpm = 0;
+uint16_t s_fuel = 0; // 1000 - max;
 
 //Timing
 uint32_t lastTime = 0;
@@ -29,6 +30,7 @@ void canSend(){
     //100 ms interval
     canSendIgnitionFrame();
     canSendRPM();
+    canSendSpeed();
 
     if(canCounter % 2 == 0){ //200 ms interval
       canSendLights();

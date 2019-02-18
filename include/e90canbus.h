@@ -11,6 +11,8 @@
 /*
   Globals
 */
+//Constant
+extern const uint8_t DTIME_MULTIPLE;
 
 //States
 extern bool s_ignition;
@@ -21,6 +23,7 @@ extern bool s_light_fog;
 extern bool s_handbrake;
 extern uint8_t s_light_indicator;
 extern uint16_t s_rpm;
+extern uint16_t s_speed;
 extern uint16_t s_fuel;
 
 //CAN object
@@ -37,6 +40,7 @@ void canSendIndicator();
 void canSendAbs();
 void canSendHandbrake();
 void canSendRPM();
+void canSendSpeed();
 
 void canSendAbsCounter();
 void canSendAirbagCounter();
