@@ -67,8 +67,7 @@ void setup() {
 
 void loop() {
   canSend();
-}
-
-void serialEvent(){
-  serialReceive();
+  if(Serial.available() > 0){
+    serialReceive();
+  }
 }
