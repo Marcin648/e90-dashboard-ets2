@@ -11,6 +11,7 @@
 #include <SPI.h>
 
 #include "e90canbus.h"
+#include "serial.h"
 
 /*
   Setting
@@ -45,6 +46,7 @@ int serial_putchar(char c, FILE* f) {
 
 FILE serial_stdout;
 
+
 /*
   Main
 */
@@ -65,5 +67,8 @@ void setup() {
 
 void loop() {
   canSend();
-  //serialEvent();
+}
+
+void serialEvent(){
+  serialReceive();
 }

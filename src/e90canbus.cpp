@@ -5,24 +5,24 @@
 */
 
 //States
-bool s_ignition = true;
+bool s_ignition = false;
 
-bool s_light_parking = true;
-bool s_light_dip = true;
-bool s_light_main = true;
+bool s_light_parking = false;
+bool s_light_dip = false;
+bool s_light_main = false;
 bool s_light_fog = false;
 bool s_handbrake = false;
 uint8_t s_light_indicator = I_OFF;
 uint16_t s_speed = 0;
 uint16_t s_rpm = 0;
-uint16_t s_fuel = 1000; // 1000 - max;
+uint16_t s_fuel = 0; // 1000 - max;
 uint8_t s_engine_temp = 91;
 
-uint8_t s_time_hour = 13;
-uint8_t s_time_minute = 37;
-uint8_t s_time_sec = 37;
-uint8_t s_time_day = 18;
-uint8_t s_time_month = 2;
+uint8_t s_time_hour = 0;
+uint8_t s_time_minute = 0;
+uint8_t s_time_sec = 0;
+uint8_t s_time_day = 1;
+uint8_t s_time_month = 1;
 uint16_t s_time_year = 2019;
 
 //Timing
@@ -56,8 +56,6 @@ void canSend(){
 
     if(canCounter % 10 == 0){ //1000 ms interval
       canSendIndicator();
-      //s_speed = 200+random(30);
-      //s_rpm = 3000+random(500);
     }
 
     if(canCounter % 600 == 0){ //60000ms interval - 1min
