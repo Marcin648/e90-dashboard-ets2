@@ -25,6 +25,7 @@ extern uint8_t s_light_indicator;
 extern uint16_t s_rpm;
 extern uint16_t s_speed;
 extern uint16_t s_fuel;
+extern uint8_t s_engine_temp;
 
 extern uint8_t s_time_hour;
 extern uint8_t s_time_minute;
@@ -49,6 +50,7 @@ void canSendHandbrake();
 void canSendRPM();
 void canSendSpeed();
 void canSendTime();
+void canSendEngineTemp();
 
 void canSendAbsCounter();
 void canSendAirbagCounter();
