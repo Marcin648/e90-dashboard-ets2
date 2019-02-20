@@ -6,15 +6,14 @@ import dateutil.parser
 serialPort = '/dev/ttyACM0'
 serialBaudrate = 115200
 
-telemetryServer = "http://localhost:25555/api/ets2/telemetry"
-
+telemetryServer = "http://127.0.0.1:25555/api/ets2/telemetry"
+#telemetryServer = "http://10.8.0.3:25555/api/ets2/telemetry"
 
 ser = serial.Serial(port=serialPort, baudrate=serialBaudrate);
 
-while ser.is_open:
-    if ser.in_waiting > 0:
-        print(ser.readline());
+ser.flushInput()
 
+while ser.is_open:
     telemetry = requests.get(telemetryServer).json();
     truck = telemetry["truck"];
     packet = bytearray()
@@ -32,9 +31,9 @@ while ser.is_open:
     if truck["blinkerLeftOn"] and truck["blinkerRightOn"]:
         packet += (3).to_bytes(1, 'little')
     else:
-        if truck["blinkerLeftOn"]:
+        if truck["blinkerLeftActive"]:
             packet += (1).to_bytes(1, 'little')
-        elif truck["blinkerRightOn"]:
+        elif truck["blinkerRightActive"]:
             packet += (2).to_bytes(1, 'little')
         else:
             packet += (0).to_bytes(1, 'little')
@@ -42,7 +41,7 @@ while ser.is_open:
     packet += truck["parkBrakeOn"].to_bytes(1, 'little')
 
     packet += int(truck["engineRpm"]).to_bytes(2, 'little')
-    packet += int(truck["speed"]).to_bytes(2, 'little')
+    packet += int(abs(truck["speed"])).to_bytes(2, 'little')
 
     fuel = 0
     if truck["fuelCapacity"] > 0:
@@ -62,8 +61,7 @@ while ser.is_open:
     packet += gameTime.year.to_bytes(2, 'little')
 
     ser.write(packet)
-    ser.flush()
-
+    ck = ser.read()
     time.sleep(0.01);
 
 print("Serial connection closed")

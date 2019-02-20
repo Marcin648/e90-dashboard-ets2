@@ -54,11 +54,11 @@ void canSend(){
       canSendFuel();
     }
 
-    if(canCounter % 10 == 0){ //1000 ms interval
+    if(canCounter % 6 == 0){ //600 ms interval
       canSendIndicator();
     }
 
-    if(canCounter % 600 == 0){ //60000ms interval - 1min
+    if(canCounter % 10 == 0){ //1000 ms interval
       canSendTime();
     }
 

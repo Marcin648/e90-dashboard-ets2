@@ -33,7 +33,7 @@ void canSendIndicator(){
     }
   }else{
     indicator_frame[0] = 0x80;
-    indicator_frame[0] = 0xF0;
+    indicator_frame[1] = 0xF0;
   }
 
   lastIndicator = s_light_indicator;

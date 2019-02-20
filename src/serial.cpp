@@ -49,9 +49,10 @@ struct __attribute__((packed)) SerialPacket{
   uint16_t year;
 };
 
+SerialPacket serialPacket;
+
 void serialReceive(){
   if(Serial.read() != 'Q') return;
-  SerialPacket serialPacket;
 
   if(Serial.readBytes((uint8_t*)&serialPacket, sizeof(SerialPacket)) == sizeof(SerialPacket)){
     s_ignition = serialPacket.ignition;
@@ -74,4 +75,5 @@ void serialReceive(){
     s_time_month = serialPacket.month;
     s_time_year = serialPacket.year;
   }
+  Serial.write('O');
 }

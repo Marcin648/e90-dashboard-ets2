@@ -53,7 +53,7 @@ FILE serial_stdout;
 void setup() {
   //Initialize serial port
   Serial.begin(SERIAL_BAUD_RATE);
-
+  Serial.setTimeout(1000);
   //Initualize printf
   fdev_setup_stream(&serial_stdout, serial_putchar, NULL, _FDEV_SETUP_WRITE);
   stdout = &serial_stdout;
