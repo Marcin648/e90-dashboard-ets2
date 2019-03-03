@@ -10,4 +10,4 @@ Euro Truck Simulator 2 telemetry on the BMW E90 instrument cluster
  - [BMW Can-bus Codes](http://www.loopybunny.co.uk/CarPC/k_can.html)
 
 ## Video
- - [![Watch the video](https://img.youtube.com/vi/5KFK7mTA3D0/maxresdefault.jpg)](https://youtu.be/5KFK7mTA3D0)
+[![Watch the video](https://img.youtube.com/vi/5KFK7mTA3D0/maxresdefault.jpg)](https://youtu.be/5KFK7mTA3D0)
