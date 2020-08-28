@@ -2,23 +2,21 @@ import serial
 import requests
 import time
 import dateutil.parser
+from cobs import cobs
 
-serialPort = '/dev/ttyACM0'
+serialPort = 'COM4'
 serialBaudrate = 115200
 
 telemetryServer = "http://127.0.0.1:25555/api/ets2/telemetry"
 #telemetryServer = "http://10.8.0.3:25555/api/ets2/telemetry"
 
-ser = serial.Serial(port=serialPort, baudrate=serialBaudrate);
+ser = serial.Serial(port=serialPort, baudrate=serialBaudrate, timeout=0.5)
 
 ser.flushInput()
-
 while ser.is_open:
-    telemetry = requests.get(telemetryServer).json();
-    truck = telemetry["truck"];
+    telemetry = requests.get(telemetryServer).json()
+    truck = telemetry["truck"]
     packet = bytearray()
-
-    packet += b'Q'
 
     packet += truck["engineOn"].to_bytes(1, 'little')
     packet += truck["lightsParkingOn"].to_bytes(1, 'little')
@@ -60,8 +58,8 @@ while ser.is_open:
 
     packet += gameTime.year.to_bytes(2, 'little')
 
-    ser.write(packet)
-    ck = ser.read()
-    time.sleep(0.01);
+    encoded = cobs.encode(packet) + b'\x00'
+    ser.write(encoded)
+    time.sleep(0.01)
 
 print("Serial connection closed")
