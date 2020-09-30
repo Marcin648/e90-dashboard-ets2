@@ -48,10 +48,10 @@ class UpdateThread(QThread):
 
             self.dashboard.handbrake = self.telemetry.truck.parking_brake
             self.dashboard.RPM = self.telemetry.truck.engine_rpm
-            self.dashboard.speed = self.telemetry.truck.speed
+            self.dashboard.speed = self.telemetry.truck.speed * 3.6
 
-            if self.telemetry.config_truck.fuel_capacity > 0:
-                self.dashboard.fuel = self.telemetry.truck.fuel / self.telemetry.config_truck.fuel_capacity
+            if self.telemetry.config_truck.fuel_capacity > 0.0:
+                self.dashboard.fuel = (self.telemetry.truck.fuel / self.telemetry.config_truck.fuel_capacity) * 1000
 
             self.dashboard.hour = 0
             self.dashboard.minute = 0
