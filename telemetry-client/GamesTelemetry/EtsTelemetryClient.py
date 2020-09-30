@@ -18,19 +18,69 @@ TELE_PACKET_CONFIG_JOB = 102
 
 TELE_PACKET_HEARTBEAT = 255
 
+class DataStream:
+    def __init__(self, data: bytearray, offset=0):
+        self.offset = offset
+        self.data = data
+
+    def get(self, format_string):
+        values = struct.unpack_from(format_string, self.data, offset=self.offset)
+        self.offset += struct.calcsize(format_string)
+        return values
+
+    def getInt8(self):
+        return self.get("<b")[0]
+
+    def getUInt8(self):
+        return self.get("<B")[0]
+
+    def getInt16(self):
+        return self.get("<h")[0]
+
+    def getUInt16(self):
+        return self.get("<H")[0]
+
+    def getInt32(self):
+        return self.get("<i")[0]
+
+    def getUInt32(self):
+        return self.get("<I")[0]
+
+    def getInt64(self):
+        return self.get("<q")[0]
+
+    def getUInt64(self):
+        return self.get("<Q")[0]
+
+    def getFloat(self):
+        return self.get("<f")[0]
+
+    def getDouble(self):
+        return self.get("<d")[0]
+
+    def getVector(self):
+        return Vector(*self.get("<fff"))
+
+    def getEuler(self):
+        return Euler(*self.get("<fff"))
+    
+    def getPlacement(self):
+        placement = Placement()
+        placement.position = self.getVector()
+        placement.orientation = self.getEuler()
+        return placement
+
+    def getString(self, size):
+        raw_string = bytearray(self.get("<" + str(size) + "B"))
+        cstring = raw_string.decode().split("\x00")[0]
+        return cstring
+
+
 @dataclass
 class Vector:
     x: float = 0.0
     y: float = 0.0
     z: float = 0.0
-
-    @staticmethod
-    def size():
-        return struct.calcsize("<Bfff")
-
-    @staticmethod
-    def unpack(data: bytearray, offset = 0):
-        return Vector(struct.unpack_from("<Bfff", data, offset=offset))
 
 @dataclass
 class Euler:
@@ -38,29 +88,10 @@ class Euler:
     pitch: float = 0.0
     roll: float = 0.0
 
-    @staticmethod
-    def size():
-        return struct.calcsize("<Bfff")
-
-    @staticmethod
-    def unpack(data: bytearray, offset = 0):
-        return Euler(struct.unpack_from("<Bfff", data, offset=offset))
-
 @dataclass
 class Placement:
     position: Vector = Vector()
     orientation: Euler = Euler()
-
-    @staticmethod
-    def size():
-        return Vector.size() + Euler.size()
-
-    @staticmethod
-    def unpack(data: bytearray, offset = 0):
-        placement = Placement()
-        placement.position = Vector.unpack(data, offset)
-        placement.orientation = Euler.unpack(data, offset = offset + Vector.size())
-        return placement
 
 @dataclass
 class Common:
@@ -70,53 +101,26 @@ class Common:
     next_rest_stop: int = 0
 
     @staticmethod
-    def size():
-        return struct.calcsize("<BfIi")
-
-    @staticmethod
     def unpack(data: bytearray, offset = 0):
-        return Common(*struct.unpack_from("<BfIi", data, offset=offset))
-
-
+        data_stream = DataStream(data, offset)
+        common = Common()
+        common.game_paused = data_stream.getUInt8()
+        common.local_scale = data_stream.getFloat()
+        common.game_time = data_stream.getUInt32()
+        common.next_rest_stop = data_stream.getInt32()
+        return common
         
 @dataclass
 class Truck():
-    __world_placement_x: float = 0.0
-    __world_placement_y: float = 0.0
-    __world_placement_z: float = 0.0
-    __world_placement_heading: float = 0.0
-    __world_placement_pitch: float = 0.0
-    __world_placement_roll: float = 0.0
-    __local_linear_velocity_x: float = 0.0
-    __local_linear_velocity_y: float = 0.0
-    __local_linear_velocity_z: float = 0.0
-    __local_angular_velocity_x: float = 0.0
-    __local_angular_velocity_y: float = 0.0
-    __local_angular_velocity_z: float = 0.0
-    __local_linear_acceleration_x: float = 0.0
-    __local_linear_acceleration_y: float = 0.0
-    __local_linear_acceleration_z: float = 0.0
-    __local_angular_acceleration_x: float = 0.0
-    __local_angular_acceleration_y: float = 0.0
-    __local_angular_acceleration_z: float = 0.0
-    __cabin_offset_x: float = 0.0
-    __cabin_offset_y: float = 0.0
-    __cabin_offset_z: float = 0.0
-    __cabin_offset_heading: float = 0.0
-    __cabin_offset_pitch: float = 0.0
-    __cabin_offset_roll: float = 0.0
-    __cabin_angular_velocity_x: float = 0.0
-    __cabin_angular_velocity_y: float = 0.0
-    __cabin_angular_velocity_z: float = 0.0
-    __cabin_angular_acceleration_x: float = 0.0
-    __cabin_angular_acceleration_y: float = 0.0
-    __cabin_angular_acceleration_z: float = 0.0
-    __head_offset_x: float = 0.0
-    __head_offset_y: float = 0.0
-    __head_offset_z: float = 0.0
-    __head_offset_heading: float = 0.0
-    __head_offset_pitch: float = 0.0
-    __head_offset_roll: float = 0.0
+    world_placement = Placement()
+    local_linear_velocity = Vector()
+    local_angular_velocity = Vector()
+    local_linear_acceleration = Vector()
+    local_angular_acceleration = Vector()
+    cabin_offset = Placement()
+    cabin_angular_velocity = Vector()
+    cabin_angular_acceleration = Vector()
+    head_offset = Placement()
     speed: float = 0.0
     engine_rpm: float = 0.0
     engine_gear: int = 0
@@ -186,106 +190,97 @@ class Truck():
     wheel_lift = [0.0] * TELE_TRUCK_WHEEL_COUNT
     wheel_lift_offset = [0.0] * TELE_TRUCK_WHEEL_COUNT
 
-    world_placement = Placement()
-    local_linear_velocity = Vector()
-    local_angular_velocity = Vector()
-    local_linear_acceleration = Vector()
-    local_angular_acceleration = Vector()
-    cabin_offset = Placement()
-    cabin_angular_velocity = Vector()
-    cabin_angular_acceleration = Vector()
-    head_offset = Placement()
-
-    @staticmethod
-    def size():
-        size = 0
-        size += struct.calcsize("<38f2i9fI2BIf2B2fB3fB2fB2fBf10B2I4B10f")
-        size += struct.calcsize("<fBI5f") * TELE_TRUCK_WHEEL_COUNT
-        return size
-
     @staticmethod
     def unpack(data: bytearray, offset = 0):
-        truck = Truck(*struct.unpack_from("<38f2i9fI2BIf2B2fB3fB2fB2fBf10B2I4B10f", data, offset=offset))
-        offset += struct.calcsize("<38f2i9fI2BIf2B2fB3fB2fB2fBf10B2I4B10f")
-
-        truck.wheel_susp_deflection = struct.unpack_from("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f")
-
-        truck.wheel_on_ground = struct.unpack_from("<" + str(TELE_TRUCK_WHEEL_COUNT) + "B", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRUCK_WHEEL_COUNT) + "B")
-
-        truck.wheel_substance = struct.unpack_from("<" + str(TELE_TRUCK_WHEEL_COUNT) + "I", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRUCK_WHEEL_COUNT) + "I")
-
-        truck.wheel_velocity = struct.unpack_from("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f")
-
-        truck.wheel_steering = struct.unpack_from("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f")
-
-        truck.wheel_rotation = struct.unpack_from("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f")
-
-        truck.wheel_lift = struct.unpack_from("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f")
-
-        truck.wheel_lift_offset = struct.unpack_from("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRUCK_WHEEL_COUNT) + "f")
-
-        truck.world_placement = Placement(
-            Vector(truck.__world_placement_x, truck.__world_placement_y, truck.__world_placement_z),
-            Euler(truck.__world_placement_heading, truck.__world_placement_pitch, truck.__world_placement_roll)
-        )
-        truck.local_linear_velocity = Vector(
-            truck.__local_linear_velocity_x, truck.__local_linear_velocity_y, truck.__local_linear_velocity_z
-        )
-        truck.local_angular_velocity = Vector(
-            truck.__local_angular_velocity_x, truck.__local_angular_velocity_y, truck.__local_angular_velocity_z
-        )
-        truck.local_linear_acceleration = Vector(
-            truck.__local_linear_acceleration_x, truck.__local_linear_acceleration_y, truck.__local_linear_acceleration_z
-        )
-        truck.local_angular_acceleration = Vector(
-            truck.__local_angular_acceleration_x, truck.__local_angular_acceleration_y, truck.__local_angular_acceleration_z
-        )
-        truck.cabin_offset = Placement(
-            Vector(truck.__cabin_offset_x, truck.__cabin_offset_y, truck.__cabin_offset_z),
-            Euler(truck.__cabin_offset_heading, truck.__cabin_offset_pitch, truck.__cabin_offset_roll)
-        )
-        truck.cabin_angular_velocity = Vector(
-            truck.__cabin_angular_velocity_x, truck.__cabin_angular_velocity_y, truck.__cabin_angular_velocity_z
-        )
-        truck.cabin_angular_acceleration = Vector(
-            truck.__cabin_angular_acceleration_x, truck.__cabin_angular_acceleration_y, truck.__cabin_angular_acceleration_z
-        )
-        truck.head_offset = Placement(
-            Vector(truck.__head_offset_x, truck.__head_offset_y, truck.__head_offset_z),
-            Euler(truck.__head_offset_heading, truck.__head_offset_pitch, truck.__head_offset_roll)
-        )
-
+        data_stream = DataStream(data, offset)
+        truck = Truck()
+        truck.world_placement = data_stream.getPlacement()
+        truck.local_linear_velocity = data_stream.getVector()
+        truck.local_angular_velocity = data_stream.getVector()
+        truck.local_linear_acceleration = data_stream.getVector()
+        truck.local_angular_acceleration = data_stream.getVector()
+        truck.cabin_offset = data_stream.getPlacement()
+        truck.cabin_angular_velocity = data_stream.getVector()
+        truck.cabin_angular_acceleration = data_stream.getVector()
+        truck.head_offset = data_stream.getPlacement()
+        truck.speed = data_stream.getFloat()
+        truck.engine_rpm = data_stream.getFloat()
+        truck.engine_gear = data_stream.getInt32()
+        truck.displayed_gear = data_stream.getInt32()
+        truck.input_steering = data_stream.getFloat()
+        truck.input_throttle = data_stream.getFloat()
+        truck.input_brake = data_stream.getFloat()
+        truck.input_clutch = data_stream.getFloat()
+        truck.effective_steering = data_stream.getFloat()
+        truck.effective_throttle = data_stream.getFloat()
+        truck.effective_brake = data_stream.getFloat()
+        truck.effective_clutch = data_stream.getFloat()
+        truck.cruise_control = data_stream.getFloat()
+        truck.hshifter_slot = data_stream.getUInt32()
+        truck.parking_brake = data_stream.getUInt8()
+        truck.motor_brake = data_stream.getUInt8()
+        truck.retarder_level = data_stream.getUInt32()
+        truck.brake_air_pressure = data_stream.getFloat()
+        truck.brake_air_pressure_warning = data_stream.getUInt8()
+        truck.brake_air_pressure_emergency = data_stream.getUInt8()
+        truck.brake_temperature = data_stream.getFloat()
+        truck.fuel = data_stream.getFloat()
+        truck.fuel_warning = data_stream.getUInt8()
+        truck.fuel_average_consumption = data_stream.getFloat()
+        truck.fuel_range = data_stream.getFloat()
+        truck.adblue = data_stream.getFloat()
+        truck.adblue_warning = data_stream.getUInt8()
+        truck.adblue_average_consumption = data_stream.getFloat()
+        truck.oil_pressure = data_stream.getFloat()
+        truck.oil_pressure_warning = data_stream.getUInt8()
+        truck.oil_temperature = data_stream.getFloat()
+        truck.water_temperature = data_stream.getFloat()
+        truck.water_temperature_warning = data_stream.getUInt8()
+        truck.battery_voltage = data_stream.getFloat()
+        truck.battery_voltage_warning = data_stream.getUInt8()
+        truck.electric_enabled = data_stream.getUInt8()
+        truck.engine_enabled = data_stream.getUInt8()
+        truck.lblinker = data_stream.getUInt8()
+        truck.rblinker = data_stream.getUInt8()
+        truck.light_lblinker = data_stream.getUInt8()
+        truck.light_rblinker = data_stream.getUInt8()
+        truck.light_parking = data_stream.getUInt8()
+        truck.light_low_beam = data_stream.getUInt8()
+        truck.light_high_beam = data_stream.getUInt8()
+        truck.light_aux_front = data_stream.getUInt32()
+        truck.light_aux_roof = data_stream.getUInt32()
+        truck.light_beacon = data_stream.getUInt8()
+        truck.light_brake = data_stream.getUInt8()
+        truck.light_reverse = data_stream.getUInt8()
+        truck.wipers = data_stream.getUInt8()
+        truck.dashboard_backlight = data_stream.getFloat()
+        truck.wear_engine = data_stream.getFloat()
+        truck.wear_transmission = data_stream.getFloat()
+        truck.wear_cabin = data_stream.getFloat()
+        truck.wear_chassis = data_stream.getFloat()
+        truck.wear_wheels = data_stream.getFloat()
+        truck.odometer = data_stream.getFloat()
+        truck.navigation_distance = data_stream.getFloat()
+        truck.navigation_time = data_stream.getFloat()
+        truck.navigation_speed_limit = data_stream.getFloat()
+        truck.wheel_susp_deflection = [data_stream.getFloat() for _ in range(TELE_TRUCK_WHEEL_COUNT)]
+        truck.wheel_on_ground = [data_stream.getUInt8() for _ in range(TELE_TRUCK_WHEEL_COUNT)]
+        truck.wheel_substance = [data_stream.getUInt32() for _ in range(TELE_TRUCK_WHEEL_COUNT)]
+        truck.wheel_velocity = [data_stream.getFloat() for _ in range(TELE_TRUCK_WHEEL_COUNT)]
+        truck.wheel_steering = [data_stream.getFloat() for _ in range(TELE_TRUCK_WHEEL_COUNT)]
+        truck.wheel_rotation = [data_stream.getFloat() for _ in range(TELE_TRUCK_WHEEL_COUNT)]
+        truck.wheel_lift = [data_stream.getFloat() for _ in range(TELE_TRUCK_WHEEL_COUNT)]
+        truck.wheel_lift_offset = [data_stream.getFloat() for _ in range(TELE_TRUCK_WHEEL_COUNT)]
         return truck
 
 @dataclass
 class Trailer:
     connected: int = 0
-    __world_placement_x: float = 0.0
-    __world_placement_y: float = 0.0
-    __world_placement_z: float = 0.0
-    __world_placement_heading: float = 0.0
-    __world_placement_pitch: float = 0.0
-    __world_placement_roll: float = 0.0
-    __local_linear_velocity_x: float = 0.0
-    __local_linear_velocity_y: float = 0.0
-    __local_linear_velocity_z: float = 0.0
-    __local_angular_velocity_x: float = 0.0
-    __local_angular_velocity_y: float = 0.0
-    __local_angular_velocity_z: float = 0.0
-    __local_linear_acceleration_x: float = 0.0
-    __local_linear_acceleration_y: float = 0.0
-    __local_linear_acceleration_z: float = 0.0
-    __local_angular_acceleration_x: float = 0.0
-    __local_angular_acceleration_y: float = 0.0
-    __local_angular_acceleration_z: float = 0.0
+    world_placement = Placement()
+    local_linear_velocity = Vector()
+    local_angular_velocity = Vector()
+    local_linear_acceleration = Vector()
+    local_angular_acceleration = Vector()
     wear_chassis: float = 0.0
     wheel_susp_deflection = [0.0] * TELE_TRAILER_WHEEL_COUNT
     wheel_on_ground = [0] * TELE_TRAILER_WHEEL_COUNT
@@ -294,60 +289,24 @@ class Trailer:
     wheel_steering = [0.0] * TELE_TRAILER_WHEEL_COUNT
     wheel_rotation = [0.0] * TELE_TRAILER_WHEEL_COUNT
 
-    world_placement = Placement()
-    local_linear_velocity = Vector()
-    local_angular_velocity = Vector()
-    local_linear_acceleration = Vector()
-    local_angular_acceleration = Vector()
-
     @staticmethod
-    def size():
-        size = 0
-        size += struct.calcsize("<B19f")
-        size += struct.calcsize("<fBI3f") * TELE_TRAILER_WHEEL_COUNT
-        return size
-
-    @staticmethod
-    def unpack(data: bytearray, offset = 0):
-        trailer = Trailer(*struct.unpack_from("<B19f", data, offset=offset))
-        offset += struct.calcsize("<B19f")
-
-        trailer.wheel_susp_deflection = struct.unpack_from("<" + str(TELE_TRAILER_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRAILER_WHEEL_COUNT) + "f")
-
-        trailer.wheel_on_ground = struct.unpack_from("<" + str(TELE_TRAILER_WHEEL_COUNT) + "B", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRAILER_WHEEL_COUNT) + "B")
-
-        trailer.wheel_substance = struct.unpack_from("<" + str(TELE_TRAILER_WHEEL_COUNT) + "I", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRAILER_WHEEL_COUNT) + "I")
-
-        trailer.wheel_velocity = struct.unpack_from("<" + str(TELE_TRAILER_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRAILER_WHEEL_COUNT) + "f")
-
-        trailer.wheel_steering = struct.unpack_from("<" + str(TELE_TRAILER_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRAILER_WHEEL_COUNT) + "f")
-
-        trailer.wheel_rotation = struct.unpack_from("<" + str(TELE_TRAILER_WHEEL_COUNT) + "f", data, offset=offset)
-        offset += struct.calcsize("<" + str(TELE_TRAILER_WHEEL_COUNT) + "f")
-
-        trailer.world_placement = Placement(
-            Vector(trailer.__world_placement_x, trailer.__world_placement_y, trailer.__world_placement_z),
-            Euler(trailer.__world_placement_heading, trailer.__world_placement_pitch, trailer.__world_placement_roll)
-        )
-        trailer.local_linear_velocity = Vector(
-            trailer.__local_linear_velocity_x, trailer.__local_linear_velocity_y, trailer.__local_linear_velocity_z
-        )
-        trailer.local_angular_velocity = Vector(
-            trailer.__local_angular_velocity_x, trailer.__local_angular_velocity_y, trailer.__local_angular_velocity_z
-        )
-        trailer.local_linear_acceleration = Vector(
-            trailer.__local_linear_acceleration_x, trailer.__local_linear_acceleration_y, trailer.__local_linear_acceleration_z
-        )
-        trailer.local_angular_acceleration = Vector(
-            trailer.__local_angular_acceleration_x, trailer.__local_angular_acceleration_y, trailer.__local_angular_acceleration_z
-        )
-
-        return trailer
+    def unpack(data: bytearray, offset = 0):  
+        data_stream = DataStream(data, offset)
+        trailer = Trailer()
+        trailer.connected = data_stream.getUInt8()
+        trailer.world_placement = data_stream.getPlacement()
+        trailer.local_linear_velocity = data_stream.getVector()
+        trailer.local_angular_velocity = data_stream.getVector()
+        trailer.local_linear_acceleration = data_stream.getVector()
+        trailer.local_angular_acceleration = data_stream.getVector()
+        trailer.wear_chassis = data_stream.getFloat()
+        trailer.wheel_susp_deflection = [data_stream.getFloat() for _ in range(TELE_TRAILER_WHEEL_COUNT)]
+        trailer.wheel_on_ground = [data_stream.getUInt8() for _ in range(TELE_TRAILER_WHEEL_COUNT)]
+        trailer.wheel_substance = [data_stream.getUInt32() for _ in range(TELE_TRAILER_WHEEL_COUNT)]
+        trailer.wheel_velocity = [data_stream.getFloat() for _ in range(TELE_TRAILER_WHEEL_COUNT)]
+        trailer.wheel_steering = [data_stream.getFloat() for _ in range(TELE_TRAILER_WHEEL_COUNT)]
+        trailer.wheel_rotation = [data_stream.getFloat() for _ in range(TELE_TRAILER_WHEEL_COUNT)]
+        return trailer  
 
 @dataclass
 class ConfigTruck:
@@ -378,14 +337,35 @@ class ConfigTruck:
     wheel_position = [Vector()] * TELE_TRUCK_WHEEL_COUNT
 
     @staticmethod
-    def size():
-        #TODO
-        pass
-
-    @staticmethod
     def unpack(data: bytearray, offset = 0):
-        #TODO
-        pass
+        data_stream = DataStream(data, offset)
+        config_truck = ConfigTruck()
+        config_truck.brand_id = data_stream.getString(TELE_STR_SIZE)
+        config_truck.brand = data_stream.getString(TELE_STR_SIZE)
+        config_truck.id = data_stream.getString(TELE_STR_SIZE)
+        config_truck.name = data_stream.getString(TELE_STR_SIZE)
+        config_truck.fuel_capacity = data_stream.getFloat()
+        config_truck.fuel_warning_factor = data_stream.getFloat()
+        config_truck.adblue_capacity = data_stream.getFloat()
+        config_truck.adblue_warning_factor = data_stream.getFloat()
+        config_truck.air_pressure_warning = data_stream.getFloat()
+        config_truck.air_pressure_emergency = data_stream.getFloat()
+        config_truck.oil_pressure_warning = data_stream.getFloat()
+        config_truck.water_temperature_warning = data_stream.getFloat()
+        config_truck.battery_voltage_warning = data_stream.getFloat()
+        config_truck.rpm_limit = data_stream.getFloat()
+        config_truck.forward_gear_count = data_stream.getUInt32()
+        config_truck.reverse_gear_count = data_stream.getUInt32()
+        config_truck.retarder_step_count = data_stream.getUInt32()
+        config_truck.cabin_position = data_stream.getVector()
+        config_truck.head_position = data_stream.getVector()
+        config_truck.hook_position = data_stream.getVector()
+        config_truck.license_plate = data_stream.getString(TELE_STR_SIZE)
+        config_truck.license_plate_country = data_stream.getString(TELE_STR_SIZE)
+        config_truck.license_plate_country_id = data_stream.getString(TELE_STR_SIZE)
+        config_truck.wheel_count = data_stream.getUInt32()
+        config_truck.wheel_position = [data_stream.getVector() for _ in range(TELE_TRUCK_WHEEL_COUNT)]
+        return config_truck
 
 @dataclass
 class ConfigTrailer:
@@ -405,14 +385,24 @@ class ConfigTrailer:
     wheel_position = [Vector()] * TELE_TRAILER_WHEEL_COUNT
 
     @staticmethod
-    def size():
-        #TODO
-        pass
-
-    @staticmethod
     def unpack(data: bytearray, offset = 0):
-        #TODO
-        pass
+        data_stream = DataStream(data, offset)
+        config_trailer = ConfigTrailer()
+        config_trailer.index = data_stream.getUInt8()
+        config_trailer.id = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.cargo_accessory_id = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.hook_position = data_stream.getVector()
+        config_trailer.brand_id = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.brand = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.name = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.chain_type = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.body_type = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.license_plate = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.license_plate_country = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.license_plate_country_id = data_stream.getString(TELE_STR_SIZE)
+        config_trailer.wheel_count = data_stream.getUInt32()
+        config_trailer.wheel_position = [data_stream.getVector() for _ in range(TELE_TRAILER_WHEEL_COUNT)]
+        return config_trailer
 
 @dataclass
 class ConfigJob:
@@ -435,18 +425,31 @@ class ConfigJob:
     planned_distance_km: int = 0
 
     @staticmethod
-    def size():
-        #TODO
-        pass
-
-    @staticmethod
     def unpack(data: bytearray, offset = 0):
-        #TODO
-        pass
+        data_stream = DataStream(data, offset)
+        config_job = ConfigJob()
+        config_job.cargo_id = data_stream.getString(TELE_STR_SIZE)
+        config_job.cargo = data_stream.getString(TELE_STR_SIZE)
+        config_job.cargo_mass = data_stream.getFloat()
+        config_job.destination_city_id = data_stream.getString(TELE_STR_SIZE)   
+        config_job.destination_city = data_stream.getString(TELE_STR_SIZE)      
+        config_job.source_city_id = data_stream.getString(TELE_STR_SIZE)        
+        config_job.source_city = data_stream.getString(TELE_STR_SIZE)
+        config_job.destination_company_id = data_stream.getString(TELE_STR_SIZE)
+        config_job.destination_company = data_stream.getString(TELE_STR_SIZE)   
+        config_job.source_company_id = data_stream.getString(TELE_STR_SIZE)     
+        config_job.source_company = data_stream.getString(TELE_STR_SIZE)        
+        config_job.income = data_stream.getUInt64()
+        config_job.delivery_time = data_stream.getUInt32()
+        config_job.is_cargo_loaded = data_stream.getUInt8()
+        config_job.job_market = data_stream.getString(TELE_STR_SIZE)
+        config_job.special_job = data_stream.getUInt8()
+        config_job.planned_distance_km = data_stream.getUInt32()
+        return config_job
 
 class Client:
     def __init__(self):
-        self.__sock = socket.socket()
+        self.__sock = None
         self.__address = None
         self.__heartbeat_last_time = 0
         self.common = Common()
@@ -481,20 +484,14 @@ class Client:
             self.truck = Truck.unpack(data, offset=1)
         elif(packet_type == TELE_PACKET_TRAILER):
             self.trailer = Trailer.unpack(data, offset=1)
-        #elif(packet_type == TELE_PACKET_CONFIG_TRUCK):
-            #self.config_truck = ConfigTruck.unpack(data, offset=1)
+        elif(packet_type == TELE_PACKET_CONFIG_TRUCK):
+            self.config_truck = ConfigTruck.unpack(data, offset=1)
+        elif(packet_type == TELE_PACKET_CONFIG_TRAILER):
+            self.config_trailer = ConfigTrailer.unpack(data, offset=1)
+        elif(packet_type == TELE_PACKET_CONFIG_JOB):
+            self.config_job = ConfigJob.unpack(data, offset=1)
         else:
-            pass
-            #print(packet_type)
-
+            print("Unknown packet type: %s" % packet_type)
 
     def close(self):
         self.__sock.close()
-
-if __name__ == "__main__":
-    a = Client()
-    a.connect("127.0.0.1", 23444)
-    for _ in range(1000):
-        a.update()
-    a.close()
-    pass
