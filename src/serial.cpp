@@ -2,7 +2,6 @@
 
 /*
   Data packet:
-  uint8_t - Magic 'Q'
   uint8_t - Ignition
   uint8_t - Parking lights
   uint8_t - Dipped lights
@@ -27,7 +26,8 @@
   uint16_t - Year
 */
 
-struct __attribute__((packed)) SerialPacket{
+#pragma pack(push, 1)
+struct SerialPacket{
   uint8_t ignition;
   uint8_t parking_lights;
   uint8_t dipped_lights;
@@ -48,32 +48,33 @@ struct __attribute__((packed)) SerialPacket{
   uint8_t month;
   uint16_t year;
 };
+#pragma pack(pop)
 
-SerialPacket serialPacket;
 
-void serialReceive(){
-  if(Serial.read() != 'Q') return;
-
-  if(Serial.readBytes((uint8_t*)&serialPacket, sizeof(SerialPacket)) == sizeof(SerialPacket)){
-    s_ignition = serialPacket.ignition;
-    s_light_parking = serialPacket.parking_lights;
-    s_light_dip = serialPacket.dipped_lights;
-    s_light_main = serialPacket.main_lights;
-    s_light_fog = serialPacket.fog_lights;
-    s_light_indicator = serialPacket.blinkers;
-
-    s_handbrake = serialPacket.handbrake;
-    s_rpm = serialPacket.RPM;
-    s_speed = serialPacket.speed;
-    s_fuel = serialPacket.fuel;
-
-    s_time_hour = serialPacket.hour;
-    s_time_minute = serialPacket.minute;
-    s_time_sec = serialPacket.second;
-
-    s_time_day = serialPacket.day;
-    s_time_month = serialPacket.month;
-    s_time_year = serialPacket.year;
+void serialReceive(const uint8_t* buffer, size_t size){
+  if(sizeof(SerialPacket) != size){
+    return;
   }
-  Serial.write('O');
+
+  SerialPacket* serialPacket = (SerialPacket*)buffer;
+
+  s_ignition = serialPacket->ignition;
+  s_light_parking = serialPacket->parking_lights;
+  s_light_dip = serialPacket->dipped_lights;
+  s_light_main = serialPacket->main_lights;
+  s_light_fog = serialPacket->fog_lights;
+  s_light_indicator = serialPacket->blinkers;
+
+  s_handbrake = serialPacket->handbrake;
+  s_rpm = serialPacket->RPM;
+  s_speed = serialPacket->speed;
+  s_fuel = serialPacket->fuel;
+
+  s_time_hour = serialPacket->hour;
+  s_time_minute = serialPacket->minute;
+  s_time_sec = serialPacket->second;
+
+  s_time_day = serialPacket->day;
+  s_time_month = serialPacket->month;
+  s_time_year = serialPacket->year;
 }

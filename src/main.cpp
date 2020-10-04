@@ -5,8 +5,7 @@
 
 #include <Arduino.h>
 
-#include <stdio.h>
-#include <stdint.h>
+#include <PacketSerial.h>
 #include <mcp_can.h>
 #include <SPI.h>
 
@@ -35,39 +34,23 @@ const int SPI_CS_PIN = 9;
 */
 MCP_CAN CAN(SPI_CS_PIN);
 
-
-/*
-  Set up printf
-*/
-int serial_putchar(char c, FILE* f) {
-    if (c == '\n') serial_putchar('\r', f);
-    return Serial.write(c) == 1? 0 : 1;
-}
-
-FILE serial_stdout;
-
+PacketSerial serial;
 
 /*
   Main
 */
 void setup() {
   //Initialize serial port
-  Serial.begin(SERIAL_BAUD_RATE);
-  Serial.setTimeout(1000);
-  //Initualize printf
-  fdev_setup_stream(&serial_stdout, serial_putchar, NULL, _FDEV_SETUP_WRITE);
-  stdout = &serial_stdout;
+  serial.begin(SERIAL_BAUD_RATE);
+  serial.setPacketHandler(&serialReceive);
 
   //Initialize CAN-BUS
   while(CAN.begin(CAN_BAUD_RATE) != CAN_OK){
-    printf("CAN Failed init!\n");
+    delay(100);
   }
-  printf("CAN init success\n");
 }
 
 void loop() {
   canSend();
-  if(Serial.available() > 0){
-    serialReceive();
-  }
+  serial.update();
 }
