@@ -11,23 +11,7 @@
 
 #include "e90canbus.h"
 #include "serial.h"
-
-/*
-  Setting
-*/
-//Delta time multiple
-// 2 - speed scale in mph
-// 3 - speed scale in km/h
-const uint8_t DTIME_MULTIPLE = 3;
-
-//Serial boud rate
-const uint32_t SERIAL_BAUD_RATE = 115200;
-
-//CAN-BUS boud rate
-const int CAN_BAUD_RATE = CAN_100KBPS;
-
-//SPI CS PIN
-const int SPI_CS_PIN = 9;
+#include "configuration.h"
 
 /*
   Set up can bus
