@@ -1,4 +1,5 @@
-#include "../include/e90canbus.h"
+#include "e90canbus.h"
+#include "globals.h"
 
 uint8_t indicator_frame[2] = {0xB1, 0xF2};
 

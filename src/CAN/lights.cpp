@@ -1,4 +1,5 @@
-#include "../include/e90canbus.h"
+#include "e90canbus.h"
+#include "globals.h"
 
 uint8_t lights_frame[3] = {0x00, 0x00, 0xf7};
 

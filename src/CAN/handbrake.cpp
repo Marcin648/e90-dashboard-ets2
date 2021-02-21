@@ -1,4 +1,5 @@
-#include "../include/e90canbus.h"
+#include "e90canbus.h"
+#include "globals.h"
 
 const uint16_t CAN_ID = 0x34F;
 uint8_t handbrake_frame[2] = {0xFE, 0xFF};

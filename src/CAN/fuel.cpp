@@ -1,4 +1,5 @@
-#include "../include/e90canbus.h"
+#include "e90canbus.h"
+#include "globals.h"
 
 uint8_t fuel_frame[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
 

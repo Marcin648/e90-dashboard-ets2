@@ -1,4 +1,5 @@
 #include "serial.h"
+#include "globals.h"
 
 /*
   Data packet:

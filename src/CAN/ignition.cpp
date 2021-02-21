@@ -1,4 +1,5 @@
-#include "../include/e90canbus.h"
+#include "e90canbus.h"
+#include "globals.h"
 
 uint8_t ignition_frame_on[5] = {0x45, 0x42, 0x69, 0x8f, 0xE2};
 uint8_t ignition_frame_off[5] = {0x00, 0x00, 0xC0, 0x0f, 0xE2};

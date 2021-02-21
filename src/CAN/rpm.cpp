@@ -1,4 +1,5 @@
-#include "../include/e90canbus.h"
+#include "e90canbus.h"
+#include "globals.h"
 
 const uint16_t CAN_ID = 0x0AA;
 uint8_t rpm_frame[8] = {0x5F, 0x59, 0xFF, 0x00, 0x34, 0x0D, 0x80, 0x99};
