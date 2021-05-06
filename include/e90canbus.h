@@ -19,6 +19,7 @@ extern const uint8_t DTIME_MULTIPLE;
 */
 
 void canSendIgnitionFrame();
+void canSendSteeringWheel();
 void canSendLights();
 void canSendFuel();
 void canSendIndicator();

@@ -14,6 +14,7 @@ void canSend(){
     canSendIgnitionFrame();
     canSendRPM();
     canSendSpeed();
+    canSendSteeringWheel();
 
     if(canCounter % 20 == 0){ //200 ms interval
       canSendLights();
