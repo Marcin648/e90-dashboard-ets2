@@ -5,3 +5,4 @@
 .gcc-flags.json
 .vscode
 .pyc
+__pycache__
