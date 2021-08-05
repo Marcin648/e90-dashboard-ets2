@@ -9,9 +9,18 @@ uint8_t lastIndicator = I_OFF; // off;
 void canSendIndicator(){
   /*
   80 - off
-  91 - left
-  a1 - right
-  b1 - hazzard
+
+  90 - left constant
+  a0 - right constant
+  b0 - hazzard constant
+
+  91 - left normal blink
+  a1 - right normal blink
+  b1 - hazzard normal blink
+
+  92 - left fast blink
+  a2 - right fast blink
+  b2 - hazzard fast blink
   */
 
   if(s_light_indicator != I_OFF){
