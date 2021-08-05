@@ -18,6 +18,7 @@ void canSend(){
 
     if(canCounter % 20 == 0){ //200 ms interval
       canSendLights();
+      canSendIndicator();
       canSendAbs();
       canSendEngineTemp();
 
@@ -29,10 +30,6 @@ void canSend(){
 
     if(canCounter % 50 == 0){ //500 ms interval
       canSendHandbrake();
-    }
-
-    if(canCounter % 60 == 0){ //600 ms interval
-      canSendIndicator();
     }
 
     if(canCounter % 100 == 0){ //1000 ms interval

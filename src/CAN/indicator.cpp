@@ -5,7 +5,10 @@ uint8_t indicator_frame[2] = {0xB1, 0xF2};
 
 const uint16_t CAN_ID = 0x1F6;
 
-uint8_t lastIndicator = I_OFF; // off;
+uint8_t last_indicator = I_OFF; // off;
+unsigned long last_indicator_time = 0;
+const unsigned long INDICATOR_OFF_DELAY = 500;
+
 void canSendIndicator(){
   /*
   80 - off
@@ -23,8 +26,19 @@ void canSendIndicator(){
   b2 - hazzard fast blink
   */
 
-  if(s_light_indicator != I_OFF){
-    switch (s_light_indicator) {
+  uint8_t light_indicator = last_indicator;
+  if(s_light_indicator == I_OFF){
+    unsigned long off_delta_time = millis() - last_indicator_time;
+    if(off_delta_time > INDICATOR_OFF_DELAY){
+      light_indicator = s_light_indicator;
+    }
+  }else{
+    light_indicator = s_light_indicator;
+    last_indicator_time = millis();
+  }
+
+  if(light_indicator != I_OFF){
+    switch (light_indicator) {
       case I_LEFT:
         indicator_frame[0] = 0x91;
         break;
@@ -36,16 +50,16 @@ void canSendIndicator(){
         break;
     }
 
-    if(lastIndicator == s_light_indicator){
-      indicator_frame[1] = 0xF1;
+    if(last_indicator == light_indicator){
+      indicator_frame[1] = 0xF0;
     }else{
-      indicator_frame[1] = 0xF2;
+      indicator_frame[1] = 0xF0;
     }
   }else{
-    indicator_frame[0] = 0x80;
+    indicator_frame[0] = 0x82;
     indicator_frame[1] = 0xF0;
   }
 
-  lastIndicator = s_light_indicator;
+  last_indicator = light_indicator;
   CAN.sendMsgBuf(CAN_ID, 0, 2, indicator_frame);
 }
