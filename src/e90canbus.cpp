@@ -18,7 +18,7 @@ void canSend(){
 
     if(canCounter % 20 == 0){ //200 ms interval
       canSendLights();
-      canSendIndicator();
+      canSendIndicator(); // internal 600ms timer
       canSendAbs();
       canSendEngineTemp();
 
