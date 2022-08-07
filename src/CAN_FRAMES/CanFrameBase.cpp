@@ -1,19 +1,18 @@
-#include "CanFrameBase.hpp"
+#include "CAN_FRAMES/CanFrameBase.hpp"
 
-CanFrameBase::CanFrameBase(uint32_t id, uint8_t data_lenght, uint32_t interval){
-    this->frame.can_id = id;
-    this->frame.can_dlc = data_lenght;
-    this->interval = interval;
+CanFrameBase::CanFrameBase(MCP2515* mcp){
+    this->mcp = mcp;
     this->last_time = millis();
 }
 
-MCP2515::ERROR CanFrameBase::send(MCP2515& mcp){
-    return mcp.sendMessage(&this->frame);
+MCP2515::ERROR CanFrameBase::send(){
+    return this->mcp->sendMessage(this->final_frame);
 }
 
 void CanFrameBase::update(){
     uint32_t courent_time = millis();
     if(courent_time - this->last_time > this->interval){
-        last_time = courent_time;
+        this->interval_tick();
+        this->last_time = courent_time;
     }
 }

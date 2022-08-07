@@ -4,15 +4,16 @@
 #include "GameTelemetry.hpp"
 
 class CanFrameBase{
-private:
-	can_frame frame;
+protected:
+	MCP2515* mcp;
+	can_frame* final_frame;
 	uint32_t interval;
 	uint32_t last_time;
 public:
-	CanFrameBase(uint32_t id, uint8_t data_lenght, uint32_t interval);
+	CanFrameBase(MCP2515* mcp);
+	MCP2515::ERROR send();
 
-	MCP2515::ERROR send(MCP2515& mcp);
-
-	virtual void update_frame(GameTelemetry& telemetry);
-	void update();	
+	virtual void update_frame(GameTelemetry& telemetry) {};
+	virtual void interval_tick() {};
+	void update();
 };
