@@ -9,6 +9,7 @@
 MCP2515 mcp(MCP_CS_PIN);
 StatusLed status_led(STATUS_LED_PIN);
 
+CanFrameAbs frame_abs(&mcp);
 CanFrameIgnation frame_ignation(&mcp);
 
 void setup(){
@@ -26,5 +27,6 @@ void setup(){
 }
 
 void loop(){
+    frame_abs.update();
     frame_ignation.update();
 }
