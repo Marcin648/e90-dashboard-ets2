@@ -2,7 +2,7 @@
 
 CanFrameAbs::CanFrameAbs(MCP2515* mcp) : CanFrameBase(mcp) {
     this->final_frame = &frame;
-    this->interval = 10;
+    this->interval = 200;
 }
 
 void CanFrameAbs::update_frame(GameTelemetry& telemetry){
