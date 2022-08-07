@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <mcp2515.h>
+#include "GameTelemetry.hpp"
 
 class CanFrameBase{
 private:
@@ -12,6 +13,6 @@ public:
 
 	MCP2515::ERROR send(MCP2515& mcp);
 
-	virtual void update_frame();
+	virtual void update_frame(GameTelemetry& telemetry);
 	void update();	
 };
