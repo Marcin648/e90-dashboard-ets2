@@ -6,7 +6,7 @@
 #include <Arduino.h>
 
 #include <PacketSerial.h>
-#include <mcp_can.h>
+#include <mcp2515_can.h>
 #include <SPI.h>
 
 #include "e90canbus.h"
@@ -16,7 +16,7 @@
 /*
   Set up can bus
 */
-MCP_CAN CAN(SPI_CS_PIN);
+mcp2515_can CAN(SPI_CS_PIN);
 
 PacketSerial serial;
 
@@ -29,7 +29,7 @@ void setup() {
   serial.setPacketHandler(&serialReceive);
 
   //Initialize CAN-BUS
-  while(CAN.begin(CAN_BAUD_RATE) != CAN_OK){
+  while(CAN.begin(CAN_BAUD_RATE, CAN_CLOCK) != CAN_OK){
     delay(100);
   }
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include <mcp_can.h>
+#include <mcp2515_can.h>
 
 //States
 extern bool s_ignition;
@@ -23,4 +23,4 @@ extern uint8_t s_time_month;
 extern uint16_t s_time_year;
 
 //CAN object
-extern MCP_CAN CAN;
+extern mcp2515_can CAN;

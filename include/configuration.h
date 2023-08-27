@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include <mcp_can_dfs.h>
+#include <mcp2515_can.h>
 
 /*
     Serial
@@ -13,6 +13,9 @@ const uint32_t SERIAL_BAUD_RATE = 115200;
 */
 //CAN-BUS boud rate
 const int CAN_BAUD_RATE = CAN_100KBPS;
+
+//CAN-BUS Shield MCP2515 clock
+const int CAN_CLOCK = MCP_16MHz;
 
 //SPI CS PIN
 const int SPI_CS_PIN = 9;
